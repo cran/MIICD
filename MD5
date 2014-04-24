@@ -1,4 +1,4 @@
-6e25d11ba3ff8e858d78887c503536b2 *DESCRIPTION
+926f478e1145d481ab9a0506c99f3eff *DESCRIPTION
 16c31148af2ec1c49cbab3a4b9eb7476 *NAMESPACE
 f3031081f9b3cb317c3cd9c83c4794f7 *R/ANDA.coxph.R
 55b75c1ee6ae879eada57c6bf6c1d020 *R/ANDA.crreg.R
@@ -13,16 +13,14 @@ d3567effde06b6ab7239e37989568b39 *R/get.set.R
 e6516f938929da49487a6fa86bb1dbf3 *R/preproc.coxph.R
 d5432960b243dc4d693d004a8b5a6c54 *R/preproc.crreg.R
 fdad02df4e7c33f267c2242aa5a2a851 *data/bcos.rda
-b59233459353fe6c0930f508f9aeb481 *data/cml.rda
 2c2f51c258161e654ff9cdf9c89400de *man/ANDA.coxph.Rd
 c56a7f02f3fd5cccc2d8adfe72317adf *man/ANDA.crreg.Rd
-a372f2b5fffc1cb7c8c66a5060031782 *man/MIICD-package.Rd
+4594d9d390c0ad0ec9597e94ad079f88 *man/MIICD-package.Rd
 cba424f5f5e5f8ec13a3a7d2e7426b3f *man/MIICD.coxph.Rd
-18e9d4e2027309a5081cc5af59fe54ec *man/MIICD.crreg.Rd
+0da1980806da9a55c7bca7756c6752f8 *man/MIICD.crreg.Rd
 6ee2ce949745b5cb65d209416e7fee5a *man/PMDA.coxph.Rd
 3581c2e8c570a85e177396476db2447f *man/PMDA.crreg.Rd
 76a68983e145775397c1fb7dec50c8ac *man/bcos.Rd
-e3f125feeb5fedd4ab790288320a756b *man/cml.Rd
 d2b7e0c3b68fa771f84ba9d90d5094f7 *man/get.est.FG.Rd
 a3a0db93c74d431259cebcf8adf7be7b *man/get.est.Rd
 2b663f8fa9f285436d6ed0e02cb80889 *man/get.est.cr.cox.Rd

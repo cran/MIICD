@@ -11,7 +11,7 @@ This set of functions applies the multiple imputation approach of Pan (2000) to 
 \tabular{ll}{
 Package: \tab MIICD\cr
 Type: \tab Package\cr
-Version: \tab 1.0\cr
+Version: \tab 1.1\cr
 Date: \tab 2014-02-17\cr
 License: \tab GPL-2\cr
 }
@@ -49,12 +49,10 @@ Wei, G. C., & Tanner, M. A. (1991). Applications of multiple imputation to the a
 \code{\link{cuminc}}
 }
 \examples{
-data(cml)
-head(cml)
-res <- MIICD.crreg( formula= ~  treatment + SOKAL , data = cml , imax = 10 ,
-k = 10 , status = 'status' , cens = 'cens' , trans = 'MMR' ,
-method = 'ANDA' , model = 'FG')
-
+data(bcos)
+head(bcos)
+res <- MIICD.coxph( formula = ~ treatment , data = bcos ,
+imax = 10 , k = 10 , th0 = 0 , method = 'ANDA' )
 res$df
 
 }

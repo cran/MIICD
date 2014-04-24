@@ -56,15 +56,7 @@ Marc Delord <mdelord@gmail.com>
 \code{\link{crr}}
 \code{\link{mvrnorm}}
 }
-\examples{
-data(cml)
-head(cml)
-#res<-MIICD.crreg( formula= ~  treatment + SOKAL  , data = cml , imax = 10 ,
-#k = 10 , th0 = 1e-1 ,  status = 'status' , cens = 'cens' , trans = 'MMR' ,
-#method = 'ANDA' , model = 'FG' , keep=c('treatment','SOKAL')
-#res$df
-
-}
+%\examples{}
 \keyword{Interval Censored Data}
 \keyword{Multiple Imputation}
 \keyword{Asymptotic Normal Data Augmentation}
