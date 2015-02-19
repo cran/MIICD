@@ -1,15 +1,18 @@
 Package: MIICD
 Type: Package
-Title: Multiple Imputation for interval censored data regression
-Version: 1.1
-Date: 2014-02-13
-Author: Marc Delord
+Title: Data Augmentation and Multiple Imputation for Interval Censored
+        Data
+Version: 2.0
+Depends: R (>= 3.0.0)
+Date: 2015-02-18
+Authors@R: person("Marc", "Delord", , "mdelord@gmail.com", role = c("aut", "cre"))
 Maintainer: Marc Delord <mdelord@gmail.com>
-Description: Applies the Pan's (2000) multiple imputation approach to Cox or Fine and Gray regression for interval censored data. 
+Description: Implements data augmentation schemes with multiple imputation steps for proportional hazards regression with interval censored data or proportional subdistribution hazards regression for interval censored competing risks data. The main functions allow to estimate survival function, cumulative incidence function, Cox and Fine & Gray regression coefficients and associated variance-covariance matrix. MIICD functions call Surv, survfit and coxph from survival package, FGR from riskRegression package, and mvrnorm from the MASS package.
+LazyData: true
 License: GPL-3
-Depends: mstate , prodlim, cmprsk, riskRegression
-Imports: MASS , survival
-Packaged: 2014-04-24 10:16:15 UTC; marc
+Imports: survival, riskRegression, MASS
+Packaged: 2015-02-19 10:15:28 UTC; marc
+Author: Marc Delord [aut, cre]
 NeedsCompilation: no
 Repository: CRAN
-Date/Publication: 2014-04-24 18:07:43
+Date/Publication: 2015-02-19 12:12:52

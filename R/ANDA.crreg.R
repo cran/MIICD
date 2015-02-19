@@ -1,112 +1,114 @@
+
 ANDA.crreg <-
-function(formula , data , imax = 25 , k = 10 , th0 = 1e-3 , status , trans , cens , keep , model = 'FG'){
-  #function parameters
+function(formula , data , k = 25 , m = 10 , status , trans , cens.code ){
   
-  prep<-preproc.crreg( data , k , trans = trans , status = status )
-  data2<-prep$data2
-  data1<-prep$data1
-  t1<-prep$t1
+  #function parameters
+  prep<-preproc.crreg( data , m = m , trans = trans , status = status , cens.code = cens.code )
+  data_int<-prep$data2
+  data_fix<-prep$data1
   or<-prep$or
   I<-prep$I
   
+  r2 <- as.character(rep( data[ , status ] , m ) )
+  r2 <-replace( r2 , r2 == cens.code , 0 )
+  
   mm<-model.matrix(formula , data)
+  nc<-sapply(sapply(strsplit( as.character(formula)[2] , '\\+' ) , function(x) gsub(" " , "", x) ),nchar)
+  nc2<-sapply(colnames(mm)[-1],nchar)
+  sub1<-substr( colnames(mm)[-1] ,  nc+1 , nc2 )
+  sub2<-paste(names(nc),sub1,sep=': ')
+  colnames(mm) <- c( colnames( mm )[ 1 ] , sub2 )
+  m1<-colMeans(mm)[-1]
   dim_beta<-ncol(mm)-1
   beta<-matrix(0,ncol=dim_beta,nrow=1)
   dn<-dimnames(mm)[[2]][-1]
-  sigma<-matrix(rep(1e-6,dim_beta^2),ncol=dim_beta,dimnames=list(dn,dn))  
-    
-  beta_AN<-mvrnorm(n=k,mu=beta,Sigma=sigma)
+  sigma<-matrix(rep(1e-3,dim_beta^2),ncol=dim_beta,dimnames=list(dn,dn))  
+  beta_AN<-mvrnorm(n=m,mu=beta,Sigma=sigma)
   
   #Step1
   # generate sets for the algorithm initialization
-  sets<-sapply(1:k , get.set , data)
+  ci0 <- MI.ci( m = m , status = status , trans = trans , data = data , cens.code = cens.code , conf.int = FALSE )$est
+  ci0$diff <- c( 0 , diff( ci0$est ) )
   
-  # derive Breslow estimate of the baseline hazard
-  bbh1<-apply(sets  ,  2  ,  get.est.FG  ,  data = data ,  t1 = t1  , status = status , trans = trans , cens = cens ,  formula = formula)
-  bbh2<-sapply(bbh1 , function(x) x$hazard)
-  bbh<-rowMeans(bbh2)
-   
   #initial linear predictors
   Z<-apply( beta_AN , 1 , function(x)  mm[,-1]%*%as.matrix(x))
-  surv<-data.frame(time = t1 , surv = exp(-bbh))
-  
-  ss1<-apply(data2 , 1 , function(x ) subset( surv , time >=  as.numeric(x['left']) & time <= as.numeric(x['right']) ) )
-  tk2<-lapply(seq_len(nrow(data2)) ,function(X)  ss1[[X]]$time)
   
   #Step 2  
   # make matrix to get results
-  cat('\nIterations\n' )
-  beta_iter<-matrix(NA,ncol=imax,nrow=dim_beta,dimnames=list(dn,1:imax))
-  sigma_iter<-matrix(NA,ncol=imax,nrow=dim_beta,dimnames=list(dn,1:imax))
-  sigma1_iter<-matrix(NA,ncol=imax,nrow=dim_beta,dimnames=list(dn,1:imax))
-  th_iter<-matrix(NA,ncol=imax,nrow=dim_beta,dimnames=list(dn,1:imax))
+  cat('\nIterates\n' )
+  beta_iter<-matrix(NA,ncol=k,nrow=dim_beta,dimnames=list(dn,1:k))
+  sigmac_iter<-matrix(NA,ncol=k,nrow=dim_beta,dimnames=list(dn,1:k))
+  W_iter<-matrix(NA,ncol=k,nrow=dim_beta,dimnames=list(dn,1:k))
+  th_iter<-matrix(NA,ncol=k,nrow=dim_beta,dimnames=list(dn,1:k))
   
   #progression bar
   pb <- txtProgressBar(style = 2 , char = '.')
   i<-0
   repeat {
-    i<-i+1 
-    setTxtProgressBar(pb ,  i%%4/150 ) 
+  i<-i+1 
+  setTxtProgressBar(pb ,  i%%4/150 ) 
    
-    if( i > imax ){setTxtProgressBar(pb ,  0.02 )
-    break }
-   
- 
-  samples<-t(sapply( seq_len(nrow(data2)) , function(X) {
-  pk2<-sapply( 1:k ,function(x) c(0,diff(1-ss1[[X]]$surv)^exp(Z[I,][X,x]) ) )
-  apply( pk2 , 2 ,function(x)
-    if( sum(x) ) sample(  tk2[[X]] , size = 1 , prob = x ) 
-  else  sample(  tk2[[X]] , size = 1 )  
-    ) }))
+  if( i > k ){setTxtProgressBar(pb ,  0.02 )
+  break }
   
-  samples2<-rbind(samples,data1)[or,]
-  
-     
-    #Get estimates
-    if(model=='FG')
-      est_1<-apply(samples2  ,  2  ,  get.est.FG , data = data ,  t1 = t1  , status = status , trans = trans , cens = cens ,  formula = formula)
-    else if(model=='Cox')
-      est_1<-apply( samples2 , 2 , get.est.cr.cox , data = data ,  t1 = t1  , status = status , trans = trans , cens = cens ,  formula = formula , keep = keep)
+  ss1<-apply( data_int , 1 , function(x ) subset( ci0 , time >=  as.numeric(x['left']) & time <= as.numeric(x['right']) ) )
+  tk2<-lapply(seq_len(nrow(data_int)) ,function(X)  ss1[[X]]$time)
       
-    #Get the beta from the successive sets
-    betas<-matrix(unlist(sapply(est_1  ,  function(x) x$beta))  ,  nrow  =  dim_beta  ,  dimnames  =  list(dn  ,  1:k))
+  samples <- sapply( seq_len( nrow( data_int ) ) , function( X ) {
+  pk2 <- sapply( 1:m , function( x ) ss1[[ X ]]$diff^exp( Z[ I ,  ][ X , x ] ) ) 
+  pk2 <- matrix(pk2,ncol=m) 
+  apply( pk2 , 2  , function( x ){
+  if( sum(x) & length(x) > 1  ) sample(  tk2[[ X ]] , size = 1 , prob = ( x ) ) 
+  else  mean( tk2[[ X ]] )  }  )  } ) 
   
-    #Get the variance 1: beta x t(beta)
-    betas2<-array(sapply(1:k,function(x) betas[,x]%*%t(betas[,x])), dim = c(dim_beta ,  dim_beta , k) , dimnames = list(dn , dn ,1:k))
-    betas2
-    #Get mean of beta over samples
-    beta <- rowMeans(matrix(unlist(sapply(est_1  ,  function(x) x$beta))  ,  nrow  =  dim_beta  ,  dimnames  =  list(dn  ,  1:k)))
-    beta
-    #calculate (1/m sum beta)t(1/m sum beta)
-    biv<-beta%*%t(beta)
-    #Get the sigma in an d3 array
-    sigma1<-array( sapply( est_1 , function(x) x$sigma)  ,  dim  =  c(dim_beta  ,  dim_beta  ,  k) )
-    msigma1<-apply(sigma1,c(1,2),mean)
-    #add the two terms to get the estimate of the first term of the variance variance (3d array)
-    wiv1<-sigma1+betas2
-    #average over datasets
-    #wiv2<-matrix(rowMeans(matrix(apply(wiv1 , 3 , unlist) , ncol = k)) , ncol = dim_beta , dimnames = list(dn , dn))
-    wiv2<-apply(wiv1,c(1,2),mean)
-    #combine the two term and get an estimate of the variance
-    sigmaf<-wiv2-biv
+  samples <- matrix( unlist( samples ) , ncol = m , byrow = T )  
     
-    #sample beta_j from a possibliy multivariate normal with mean means of the betas and sigma obtained before
-    beta_AN<-mvrnorm(n=k,mu=beta,Sigma=sigmaf)
-    #get new linear predictor
-    Z<-apply( beta_AN , 1 , function(x)  mm[,-1]%*%as.matrix(x))
-    #get the new estimate of the survival
-    surv_<-rowMeans(sapply(est_1 , function(x) x$surv))
-    surv <- data.frame(time = t1 , surv = surv_)
-    #save estimate of beta and sigma for the prensent iteration
-    beta_iter[,i]<-beta
-    sigma_iter[,i]<-diag(sigmaf)
-    sigma1_iter[,i]<-diag(msigma1) 
-    #convergence criteria
-    th_iter[,i]<-rowMeans(beta_iter,na.rm=T)
-  }
-  th_iter<-matrix(th_iter[!is.na(th_iter)],nrow=dim_beta)
-  close(pb)
+  samples2 <- rbind( samples , data_fix )[ or , ]
+  times<-as.vector(samples2)
   
-    ret<-list(beta=beta_iter,sr_sigma=sigma_iter,n_iter=i,conv=th_iter,sigma1=sigma1_iter)
+  ci<-Surv( time = times , event = r2 , type = 'mstate')
+  fitCI<-survfit( ci ~ 1 , weights = rep( 1 , length( times ) ) / m )  
+  w <- which( fitCI$states == trans )
+  pr <- fitCI$prev[ , w ]
+  t0 <- fitCI$time
+  
+  #Get estimates
+  est_1<-apply(samples2 , 2 , get.est.FG , data = data , status = status , trans = trans , cens = cens.code ,  formula = formula )
+    
+  #Get the beta from the successive sets
+  betas<-matrix(unlist(sapply( est_1  ,  function(x) x$beta))  ,  nrow  =  dim_beta  ,  dimnames  =  list(dn  ,  1:m))
+  
+  #Get mean of beta over samples
+  beta <- rowMeans(matrix(unlist(sapply(est_1 , function(x) x$beta))  , nrow  =  dim_beta , dimnames  = list(dn  ,  1:m)))
+  
+  #Get the sigma square in an d3 array
+  sigma<-array( sapply( est_1 , function(x) x$sigma)  ,  dim  =  c(dim_beta  ,  dim_beta  ,  m) )
+  W<-apply(sigma,c(1,2),mean)
+  
+  #update de variance covariance matrix
+  B<- ( 1 + ( 1/m ) ) * ( (betas-beta) %*% t(betas-beta) / (m-1) )
+  
+  #update de variance matrix
+  sigmac <- W + B
+  
+  #sample beta_j from a possibliy multivariate normal with mean means of the betas and sigma obtained before
+  beta_AN<-mvrnorm( n = m , mu = beta , Sigma = sigmac )
+  
+  #get new linear predictor
+  Z<-apply( beta_AN , 1 , function(x)  mm[,-1]%*%as.matrix(x))
+  
+  #update the CIF0
+  ci0 <- data.frame( time = t0 , est = 1 - abs( 1 - pr )^( exp( sum( -beta*m1 ) ) ) )
+  ci0 <- rbind( c(time = 0, est = 0 ) , ci0 )
+  ci0$diff <- c( 0 , diff( ci0$est ) )
+  
+  #save estimate of beta and sigma for the prensent iteration
+  beta_iter[,i]<-beta
+  sigmac_iter[,i]<-diag(sigmac)
+    
+  }
+  close(pb)
+  ret<-list( beta = beta_iter , sigmac = sigmac_iter , vcov = sigmac , ci0 = ci0 )
   return(ret)
 }
+
