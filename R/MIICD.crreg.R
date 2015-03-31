@@ -7,7 +7,7 @@
 #'  @inheritParams DA.ci
 #'  @param method Which data augmentation scheme shall be used ? Two algorithms are implemented : \emph{The Poor man's Data Augmentation scheme} and the \emph{Asymptotic Normal Data Augmentation scheme} (the later may be preferred).
 #'  @export
-#'  @import survival riskRegression MASS
+#'  @import survival MASS mstate
 #'  @examples
 #'  #res <- MIICD.crreg(formula = ~ treatment, k = 10, m = 10, status = 'status',
 #'  #trans = 1, data = ICCRD,  cens.code = 0, method = 'ANDA', verbose = FALSE )

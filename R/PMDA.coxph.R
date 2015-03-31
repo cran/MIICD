@@ -48,14 +48,18 @@ function(formula , data , k , m ){
   
   Z <- matrix( rep( Z[,1] , m ) , ncol = m , byrow = F )
   #Get the samples from drown betas from the normal mixture
-
+#X<-64
+#abline(v=c(1.15263887, 1.2628168))
+#plot(s0$time,s0$surv,type='s')
   samples <- sapply( seq_len( nrow( data_int ) ) , function( X ) {
+  #for(X in 1:nrow( data_int )){
+  #print(X)
   pk2 <- sapply( 1:m , function( x ) ss1[[ X ]]$diff^exp( Z[ I ,  ][ X , x ] ) ) 
   pk2 <- matrix(pk2,ncol=m) 
   apply( pk2 , 2  , function( x ){
-  if( sum(x) & length(x) > 1  ) sample(  tk2[[ X ]] , size = 1 , prob = ( x ) ) 
-  #else  data_int[ X , 'right' ]  }  ) } ) 
-  else  mean(tk2[[ x ]])  }  ) } ) 
+  if( sum(unlist(x)) & length(unlist(x)) > 1  ) sample(  tk2[[ X ]] , size = 1 , prob = ( x ) ) 
+  else  data_int[ X , 'right' ]  }  ) } ) 
+  
   samples <- matrix( unlist( samples ) , ncol = m , byrow = T )  
   samples2<-rbind(samples,data_fix)[or,]
   times<-as.vector(samples2)
@@ -63,7 +67,7 @@ function(formula , data , k , m ){
   surv<-Surv( time = times , event = rep( data$right != Inf , m )  , type = 'right')
   surv2<-Surv( time = times , event = rep( data$right != Inf , m )  , type = 'mstate')
   surv2[,2] <- surv[,2]
-  fitCI<-survfit( surv2 ~ 1 , weights = rep( 1 , length( times ) ) / m )  
+  fitCI<-survfit( surv2 ~ 1 , weights = rep( 1 , length( times ) ) / m , conf.type = 'none' )  
   pr <- fitCI$prev
   t0 <- fitCI$time
   #lines(t0,1-pr,type='s' , col = 2 )  
@@ -85,7 +89,7 @@ function(formula , data , k , m ){
     s0 <- rbind( c( time = 0 , surv = 1 ) , s0 )
     s0$surv[is.na(s0$surv)] <- 0
     s0$diff <- c( 0 , diff( 1 - s0$surv ) )
-    
+
     #Betwin variance: B with inflation factor 1/k 
     B <- ( 1 + ( 1 / m ) ) * ( ( betas - beta ) %*% t( betas - beta ) / ( m - 1 ) )
     #update de variance matrix

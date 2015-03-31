@@ -1,6 +1,6 @@
 
 get.est.FG <-
-  function( x , data ,  status , trans , cens , keep ,  formula ){
+  function( x , data ,  status , trans , cens , formula ){
   df1 <- data.frame( data , 'ns' = x )
   FGR1<-paste("FGR( Hist( time = ns , event = ",status,", cens.code = '", cens ,"' )", deparse(formula) ,", data = df1 , cause = '",trans,"' )" ,sep='' )
   FGR2<-eval(parse(text=FGR1)) 

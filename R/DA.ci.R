@@ -15,7 +15,7 @@
 #'  conf.int = TRUE, cens.code = 0 , alpha = 0.05)
 #'  res # print(res)
 #'  plot(res)
-#'  @export
+#'  #@export
 #'  @import survival
 #'  @return \code{est} A data frame with estimates
 #'  @return \code{\dots} Other objects
@@ -88,7 +88,7 @@ samples2<-rbind(samples,data_fix)[or,]
 times<-as.vector(samples2)
 
 ci<-Surv( time = times , event = r2 , type = 'mstate')
-fitCI<-survfit( ci ~ 1 , weights = rep( 1 , length( times ) ) / m )  
+fitCI<-survfit( ci ~ 1 , weights = rep( 1 , length( times ) ) / m , conf.type = 'none')  
 w <- which( fitCI$states == trans )
 sd <- fitCI$std.err[ , w ]
 pr <- fitCI$prev[ , w ]

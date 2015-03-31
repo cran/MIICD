@@ -53,7 +53,8 @@ function(formula , data , k  , m )
   pk2 <- matrix(pk2,ncol=m) 
   apply( pk2 , 2  , function( x ){
   if( sum(x) & length(x) > 1  ) sample(  tk2[[ X ]] , size = 1 , prob = ( x ) ) 
-  else  mean( tk2[[ X ]] )  }  )  }  ) 
+  else  data_int[ X , 'right' ]  }  ) } )
+    
   samples <- matrix( unlist( samples ) , ncol = m , byrow = T )  
   
     
@@ -63,7 +64,7 @@ function(formula , data , k  , m )
   surv<-Surv( time = times , event = rep( data$right != Inf , m )  , type = 'right')
   surv2<-Surv( time = times , event = rep( data$right != Inf , m )  , type = 'mstate')
   surv2[,2] <- surv[,2]
-  fitCI<-survfit( surv2 ~ 1 , weights = rep( 1 , length( times ) ) / m )  
+  fitCI<-survfit( surv2 ~ 1 , weights = rep( 1 , length( times ) ) / m , conf.type = 'none')  
   pr    <- fitCI$prev
   t0    <- fitCI$time
   

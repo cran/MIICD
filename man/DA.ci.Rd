@@ -56,6 +56,7 @@ res <- DA.ci(k = 10,  m = 10, status = 'status',  trans = 1 , data = ICCRD,
  conf.int = TRUE, cens.code = 0 , alpha = 0.05)
  res # print(res)
  plot(res)
+ #
 }
 \author{
 Marc Delord \email{<mdelord@gmail.com>}

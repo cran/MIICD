@@ -49,7 +49,7 @@ times<-as.vector(sets)
 surv<-Surv( time = times , event = rep( data$right != Inf , m ) , type = "right"  )
 surv2<-Surv( time = times , event = rep( data$right != Inf , m ) , type = "mstate"  )  
 surv2[,2]<-surv[,2]
-fitsurv<-survfit( surv2 ~ 1 , weights = rep( 1 , length( times ) ) / m )  
+fitsurv<-survfit( surv2 ~ 1 , weights = rep( 1 , length( times ) ) / m , conf.type = 'none')  
 sd <- fitsurv$std.err
 pr <- fitsurv$prev
 t0 <- fitsurv$time

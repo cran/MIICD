@@ -54,15 +54,18 @@ cl<-match.call()
 sets<-sapply( 1:m , get.set , data )
 #Get and sort single times at wich the cumulative incidence will be estimated
 times<-as.vector(sets)
-###
-
+length(times)
+  ###
+data
 r2 <- as.character( rep( data[ , status ] , m  ) )
-r2 <- replace( r2 , r2 == cens.code ,  0 )
+r2<-factor(r2,levels=unique(c(cens.code,unique(r2))))
+r2
 
-r1 <- as.character(  data[ , status ] ) 
-r1 <- replace( r1 , r1 == cens.code ,  0 )
-  
-fitCI <- survfit( Surv( time = times , event = r2 , type = "mstate"  ) ~ 1  , weights = rep( 1 / m , length(times) ) )
+  r1 <- as.character(  data[ , status ] ) 
+r1<-factor(r1,levels=unique(c(cens.code,unique(r1))))
+
+fitCI <- survfit( Surv( time = times , event = r2 , type = "mstate"  ) ~ 1  , weights = rep( 1 / m , length(times) ) ,
+conf.type = 'none' )
 
 w <- which( fitCI$states == trans )
 pr <- fitCI$prev[ , w ]

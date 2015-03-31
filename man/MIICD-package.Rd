@@ -3,18 +3,18 @@
 \docType{package}
 \title{Data Augmentation and Multiple Imputation for Interval Censored Data}
 \description{This is version 2.0 of the MIICD package: bugs have been corrected and 2 sets of functions have been added to the previous MIICD functions. 
-Proposed functions applie data augmentation and/or the multiple imputation approach of Pan (2000) to handle interval censored data with the Cox proportional hazards regression and interval censored competing risks data with the Fine & Gray proportional subdistribution hazards regression. 3 main sets of function are proposed: \itemize{
+Proposed functions apply data augmentation and/or the multiple imputation approach of Pan (2000) to handle interval censored data with the Cox proportional hazards regression and interval censored competing risks data with the Fine & Gray proportional subdistribution hazards regression. 3 main sets of functions are proposed: \itemize{
 \item \code{MI.surv} and \code{MI.ci}: these functions use the multiple imputation approach to compute the survival function and the cumulative incidence function with confidence intervals, for interval censored data and interval censored competing risks data respectively.  \code{print} and \code{plot} methods are available.
-\item \code{DA.surv} and \code{DA.ci}: these functions use data augmentation scheme with multiple imputation at each iteration to compute the survival function and the cumulative incidence function with confidence intervals, for interval censored data and interval censored competing risks data respectively. \code{print} and \code{plot} methods are available.
+\item \code{DA.surv} and \code{DA.ci}: these functions use data augmentation schemes with multiple imputation at each iteration to compute the survival function and the cumulative incidence function with confidence intervals, for interval censored data and interval censored competing risks data respectively. \code{print} and \code{plot} methods are available.
 \item \code{MIICD.coxph} and \code{MIICD.crreg}: both functions use data augmentation schemes with multiple imputation at each iteration to handle interval censored data with the Cox propotional hazards regression, and interval censored competing risks data with the Fine and Gray subdistribution hazard regression.
 \itemize{
 \item \code{MIICD.coxph} compute the baseline survival function and Cox regression parameters. 
 \item \code{MIICD.rcreg} compute the baseline cumulative incidence function and Fine & Gray regression parameters.
 }
-For both function, the \emph{Poor Man's Data augmentation} (\code{PMDA})  and the \emph{Asymptotic Normal Data Augmentation} (\code{ANDA}) shemes are implemented (by using the \code{methode} parameter) (Pan 2000; Wei and Tanner 1991; Tanner and Wong 1987a). \code{print} and \code{plot} methods are available.
+For both functions, the \emph{Poor Man's Data augmentation} (\code{PMDA})  and the \emph{Asymptotic Normal Data Augmentation} (\code{ANDA}) shemes are implemented (by using the \code{methode} parameter) (Pan 2000; Wei and Tanner 1991; Tanner and Wong 1987a). \code{print} and \code{plot} methods are available.
 }
 
-MIICD functions call iteratively the \code{coxph} (library \code{survival}) or the \code{FGR} (library \code{riskRegression}) function on imputed datasets and derive multiple estimates from imputed data sets. Finally it combines multiple estimates following multiple imputation rules (Rubin (1987); Schenker and Welsh (1988); Tanner and Wong (1987b)) to update parameter estimates. When ANDA is chosen, \code{mvrnorm} (package \code{MASS}) is called.
+MIICD functions call iteratively the \code{coxph} (library \code{survival}) or the \code{FGR} (library \code{riskRegression}) function on imputed datasets and derive multiple estimates from imputed data sets. Finally multiple estimates are combined following multiple imputation rules (Rubin (1987); Schenker and Welsh (1988); Tanner and Wong (1987b)) to update parameter estimates. When ANDA is chosen, \code{mvrnorm} (package \code{MASS}) is called.
 }
 \details{
 \tabular{ll}{
@@ -53,7 +53,6 @@ Wei, G. C., & Tanner, M. A. (1991). Applications of multiple imputation to the a
 \code{\link{Surv}}
 \code{\link{survfit}}
 \code{\link{coxph}}
-\code{\link{FGR}}
 \code{\link{mvrnorm}}
 }
 \examples{

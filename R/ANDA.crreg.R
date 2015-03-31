@@ -10,7 +10,7 @@ function(formula , data , k = 25 , m = 10 , status , trans , cens.code ){
   I<-prep$I
   
   r2 <- as.character(rep( data[ , status ] , m ) )
-  r2 <-replace( r2 , r2 == cens.code , 0 )
+  r2<-factor(r2,levels=unique(c(cens.code,unique(r2))))
   
   mm<-model.matrix(formula , data)
   nc<-sapply(sapply(strsplit( as.character(formula)[2] , '\\+' ) , function(x) gsub(" " , "", x) ),nchar)
@@ -28,8 +28,9 @@ function(formula , data , k = 25 , m = 10 , status , trans , cens.code ){
   #Step1
   # generate sets for the algorithm initialization
   ci0 <- MI.ci( m = m , status = status , trans = trans , data = data , cens.code = cens.code , conf.int = FALSE )$est
+  #ci0 <- MI.ci( m = m , status = status , trans = trans , data = data , cens.code = cens.code , conf.int = FALSE )
   ci0$diff <- c( 0 , diff( ci0$est ) )
-  
+  #plot(ci0)
   #initial linear predictors
   Z<-apply( beta_AN , 1 , function(x)  mm[,-1]%*%as.matrix(x))
   
@@ -50,30 +51,34 @@ function(formula , data , k = 25 , m = 10 , status , trans , cens.code ){
    
   if( i > k ){setTxtProgressBar(pb ,  0.02 )
   break }
-  
+  data_int[61,]
   ss1<-apply( data_int , 1 , function(x ) subset( ci0 , time >=  as.numeric(x['left']) & time <= as.numeric(x['right']) ) )
   tk2<-lapply(seq_len(nrow(data_int)) ,function(X)  ss1[[X]]$time)
-      
+  
   samples <- sapply( seq_len( nrow( data_int ) ) , function( X ) {
   pk2 <- sapply( 1:m , function( x ) ss1[[ X ]]$diff^exp( Z[ I ,  ][ X , x ] ) ) 
   pk2 <- matrix(pk2,ncol=m) 
   apply( pk2 , 2  , function( x ){
   if( sum(x) & length(x) > 1  ) sample(  tk2[[ X ]] , size = 1 , prob = ( x ) ) 
-  else  mean( tk2[[ X ]] )  }  )  } ) 
+  else  data_int[ X , 'right' ]  }  ) } )    
   
   samples <- matrix( unlist( samples ) , ncol = m , byrow = T )  
     
-  samples2 <- rbind( samples , data_fix )[ or , ]
+  if(dim(data_fix)[2]){
+    samples2 <- rbind( samples , data_fix )[ or , ]
+  }else{ samples2 <- samples }  
+    
+    
   times<-as.vector(samples2)
   
   ci<-Surv( time = times , event = r2 , type = 'mstate')
-  fitCI<-survfit( ci ~ 1 , weights = rep( 1 , length( times ) ) / m )  
+  fitCI<-survfit( ci ~ 1 , weights = rep( 1 , length( times ) ) / m , conf.type = 'none')  
   w <- which( fitCI$states == trans )
   pr <- fitCI$prev[ , w ]
   t0 <- fitCI$time
   
   #Get estimates
-  est_1<-apply(samples2 , 2 , get.est.FG , data = data , status = status , trans = trans , cens = cens.code ,  formula = formula )
+  est_1<-apply(samples2 , 2 , get.est.cr.cox , data = data , status = status , trans = trans , cens = cens.code ,  formula = formula )
     
   #Get the beta from the successive sets
   betas<-matrix(unlist(sapply( est_1  ,  function(x) x$beta))  ,  nrow  =  dim_beta  ,  dimnames  =  list(dn  ,  1:m))

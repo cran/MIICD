@@ -9,7 +9,8 @@ function( formula , data , k  , m  , status , trans , cens.code ){
   I<-prep$I
   
   r2 <- as.character(rep( data[ , status ] , m ) )
-  r2 <-replace( r2 , r2 == cens.code , 0 )
+  r2<-factor(r2,levels=unique(c(cens.code,unique(r2))))
+  
   
   mm<-model.matrix(formula , data)
   nc<-sapply(sapply(strsplit( as.character(formula)[2] , '\\+' ) , function(x) gsub(" " , "", x) ),nchar)
@@ -23,6 +24,8 @@ function( formula , data , k  , m  , status , trans , cens.code ){
   dn<-dimnames(mm)[[2]][-1]
   
   #Step1
+  #ci0 <- MI.ci( m = m , status = status , trans = trans , data = data , cens.code = cens.code , conf.int = FALSE , alpha = 0.05 )
+  
   ci0 <- MI.ci( m = m , status = status , trans = trans , data = data , cens.code = cens.code , conf.int = FALSE , alpha = 0.05 )$est
   ci0$diff <- c( 0 , diff( ci0$est ) )
   
@@ -56,43 +59,52 @@ function( formula , data , k  , m  , status , trans , cens.code ){
   pk2 <- matrix(pk2,ncol=m) 
   apply( pk2 , 2  , function( x ){
   if( sum(x) & length(x) > 1  ) sample(  tk2[[ X ]] , size = 1 , prob = ( x ) ) 
-  else  mean( tk2[[ X ]] )  }  )  }  ) 
+  else  data_int[ X , 'right' ]  }  ) } ) 
   
   samples <- matrix( unlist( samples ) , ncol = m , byrow = T ) 
-  samples2 <- rbind( samples , data_fix )[ or , ]
-      
+  
+  if(dim(data_fix)[2]){
+    samples2 <- rbind( samples , data_fix )[ or , ]
+  }else{ samples2 <- samples }
+  
   times<-as.vector(samples2)
   ci<-Surv( time = times , event = r2 , type = 'mstate')
-  fitCI<-survfit( ci ~ 1 , weights = rep( 1 , length( times ) ) / m )  
+  fitCI<-survfit( ci ~ 1 , weights = rep( 1 , length( times ) ) / m  , conf.type = 'none')  
   w <- which( fitCI$states == trans )
   pr <- fitCI$prev[ , w ]
   t0 <- fitCI$time
   
-  est_1<-apply(samples2 , 2 , get.est.FG , data = data , status = status , trans = trans , cens = cens.code ,  formula = formula )
+  est_1<-apply(samples2 , 2 , get.est.cr.cox , data = data , status = status , trans = trans , cens.code = cens.code ,  formula = formula )
       
   #get the betas in a matrix (x * k)
   betas<-matrix( unlist( sapply( est_1 , function( x ) x$beta)) , nrow = dim_beta , dimnames = list( dn , 1:m ) )
-  
+  betas
+  #Wei&Tanner
+  wt1<-(betas%*%t(betas))/m
   #get the mean of the betas over augmented datasets
   beta <- rowMeans(matrix(unlist(sapply(est_1  ,  function(x) x$beta))  ,  nrow  =  dim_beta  ,  dimnames  =  list(dn  ,  1:m)))
-  
+  beta
   #Get the sigma in an d3 array
   sigma<-array(sapply(est_1 , function(x) x$sigma)  ,  dim  =  c(dim_beta  ,  dim_beta  ,  m))
   
   #within variance: W
   W <- apply( sigma , c( 1 , 2 ) , mean )
-  
+  #Wei & Tanner
+  #W + wt1 - rowMeans(betas)%*%t(rowMeans(betas))
+    
+    
+    
   #update the CIF0
   ci0 <- data.frame( time = t0, est = 1 - ( 1 - pr )^( exp( sum( - beta * m1 ) ) ) )
   ci0 <- rbind( c(time = 0, est = 0 ) , ci0 )
   ci0$diff <- c( 0 , diff( ci0$est ) )
   
   #Betwin variance: B with inflation factor 1/m 
-  B <- ( 1 + ( 1/m ) ) * ( (betas-beta) %*% t(betas-beta) / (m-1) )
+  B <- ( 1 + ( 0/m ) ) * ( (betas-beta) %*% t(betas-beta) / (m - 0) )
   
   #update de variance matrix
   sigmac <- W + B
-  
+  #sigmac
   #update linear predictor
   Z <- mm[,-1]%*%as.matrix(beta)
   beta_iter[,i]<-beta

@@ -50,10 +50,9 @@ data_fix<-prep$data1
 or<-prep$or
 I<-prep$I
 
-s1<-Surv( time = data$left, time2 = data$right , type = 'interval2')
-sf1<-survfit(s1~1)  
-
-r1<-range(sf1$time)
+#s1<-Surv( time = data$left, time2 = data$right , type = 'interval2')
+#sf1<-survfit(s1~1)  
+#r1<-range(sf1$time)
 #Multiple Imputation
 CI <- MI.surv( m = m ,  data = data , conf.int = F , alpha = alpha )$est
 CI$diff <- c(0 , diff(1 - CI$surv ) )
@@ -76,7 +75,7 @@ surv<-Surv( time = times , event = rep( data$right != Inf , m )  , type = 'right
 surv2<-Surv( time = times , event = rep( data$right != Inf , m )  , type = 'mstate')  
 surv2[ , 2 ] <- surv[ , 2 ]    
 
-fitCI<-survfit( surv2 ~ 1 , weights = rep( 1 , length( times ) ) / m )  
+fitCI<-survfit( surv2 ~ 1 , weights = rep( 1 , length( times ) ) / m  , conf.type = 'none')  
 sd <- fitCI$std.err
 pr <-  1 - fitCI$prev
 t0 <- fitCI$time

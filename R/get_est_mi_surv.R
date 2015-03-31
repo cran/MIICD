@@ -7,7 +7,7 @@ get_est_mi_surv<-function( x , imp_sets , data = data  ){
   surv <-  Surv( time = t1 , event = r3 , type = "right"  )
   surv2 <- Surv( time = t1 , event = r3 , type = "mstate"  )
   surv2[,2] <- surv[,2]
-  fitCI <- survfit( surv2 ~ 1 ) 
+  fitCI <- survfit( surv2 ~ 1 , conf.type = 'none') 
   sd <- fitCI$std.err
   pr <- fitCI$prev
   t0 <- fitCI$time
