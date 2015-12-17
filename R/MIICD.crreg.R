@@ -1,28 +1,28 @@
-#'  @title Fine & Gray regression for interval censored competing risks data using data augmentation and multiple imputation
+#'  @title Fine & Gray regression for interval censored competing risks data using multiple imputation
 #'  @author Marc Delord \email{<mdelord@@gmail.com>}
-#'  @description Uses data augmentation and multiple imputation approach to compute regression coefficient and its associated
-#'  variance-covariance matrix, and baseline cumulative incidence estimates for competing risks interval censorded competing risks data
+#'  @description Uses the multiple imputation approach to compute regression coefficient and its associated
+#'  variance-covariance matrix, and baseline cumulative incidence estimates for interval censorded competing risks data
 #'  @param formula A formula. The right hand side indicates names of covariables to be found in \code{data}
 #'  @param verbose Logical, display the results ? 
-#'  @inheritParams DA.ci
-#'  @param method Which data augmentation scheme shall be used ? Two algorithms are implemented : \emph{The Poor man's Data Augmentation scheme} and the \emph{Asymptotic Normal Data Augmentation scheme} (the later may be preferred).
+#'  @inheritParams MI.ci
+#'  @param method Which data augmentation scheme shall be used ? Two algorithms are implemented : \emph{The Poor man's Data Augmentation 
+#'  scheme} and the \emph{Asymptotic Normal Data Augmentation scheme} (the later may be preferred).
 #'  @export
 #'  @import survival MASS mstate
 #'  @examples
-#'  #res <- MIICD.crreg(formula = ~ treatment, k = 10, m = 10, status = 'status',
-#'  #trans = 1, data = ICCRD,  cens.code = 0, method = 'ANDA', verbose = FALSE )
-#'  #res
-#'  #plot(res)
+#'  res <- MIICD.crreg(formula = ~ treatment, k = 5, m = 5, status = 'status',
+#'  trans = 1, data = ICCRD,  cens.code = 0, method = 'ANDA', verbose = FALSE )
+#'  res
+#'  plot(res)
 #'  #diagnostic plot for coefficients end associated standard error
-#'  #plot(res , type = 'coef' , coef = 1)
-#'  #plot(res , type = 'sigma' , coef = 1)
+#'  plot(res , type = 'coef' , coef = 1)
+#'  plot(res , type = 'sigma' , coef = 1)
 #'  @return \code{Coef.} Final estimate of the coefficient
 #'  @return \code{vcov}  Final estimate of the variance-covariance matrix
 #'  @return \code{Coef_seq} Sequence of the coefficient estimate over iterations
 #'  @return \code{Sigma_seq} Sequence of the coefficient standard deviation over iterations
 #'  @return \code{df} data frame containing the main results 
 #'  @return \code{\dots} Other returned values
-
 #'  @details This function uses data augmentation and multiple imputation aproach to estimate regression coefficient, variance-covariance
 #'  matrix and baseline cumulative incidence estimates in a competing risks proportional hazards regression model for interval censorded
 #'  competing risks data.
@@ -41,6 +41,8 @@
 #'  observations. When an observation is right censored, the \code{status} column must contain the censor indicator specified by
 #'  \code{cens.code}. The transition of interest must be precised by the \code{trans} parameter. 
 #'  
+#'  @references Delord, M. & Genin, E. Multiple Imputation for Competing Risks Regression with Interval Censored Data Journal of Statistical
+#'  Computation and Simulation, 2015
 #'  @references Fine JP and Gray RJ (1999) A proportional hazards model for the subdistribution of a competing risk. JASA 94:496-509.
 #'  @references PAN, Wei. A Multiple Imputation Approach to Cox Regression with Interval-Censored Data. Biometrics, 2000, vol. 56, no 1,
 #'   p. 199-203.
@@ -144,4 +146,3 @@ plot.MIICD_crreg <- function (x, type = c('baseline','coef','sigma'), coef = 1, 
       plot(as.vector(x$Sigma_seq[coef,]) , type ='b' ,xlab='Iteration' , ylab = paste('sd(',rownames(x$Coef_seq)[coef],')',sep=' '))
     }
     }
-

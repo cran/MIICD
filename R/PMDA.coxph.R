@@ -14,13 +14,12 @@ function(formula , data , k , m ){
   sub1<-substr( colnames(mm)[-1] ,  nc+1 , nc2 )
   sub2<-paste(names(nc),sub1,sep=': ')
   colnames(mm) <- c( colnames( mm )[ 1 ] , sub2 )
-  m1<-colMeans(mm)[-1]
   dim_beta<-ncol(mm)-1
   beta<-matrix(0,ncol=dim_beta,nrow=1)
   dn<-dimnames(mm)[[2]][-1]
   
   #Step1
-  s0 <- MI.surv( m = m , data =  data , conf.int = F )$est
+  s0 <- MI.surv_1( m = m , data =  data , conf.int = F )$est
   s0$diff<-c(0,diff(1-s0$surv))
   
   #initial linear predictors
@@ -48,9 +47,6 @@ function(formula , data , k , m ){
   
   Z <- matrix( rep( Z[,1] , m ) , ncol = m , byrow = F )
   #Get the samples from drown betas from the normal mixture
-#X<-64
-#abline(v=c(1.15263887, 1.2628168))
-#plot(s0$time,s0$surv,type='s')
   samples <- sapply( seq_len( nrow( data_int ) ) , function( X ) {
   #for(X in 1:nrow( data_int )){
   #print(X)
@@ -64,13 +60,15 @@ function(formula , data , k , m ){
   samples2<-rbind(samples,data_fix)[or,]
   times<-as.vector(samples2)
     
-  surv<-Surv( time = times , event = rep( data$right != Inf , m )  , type = 'right')
-  surv2<-Surv( time = times , event = rep( data$right != Inf , m )  , type = 'mstate')
-  surv2[,2] <- surv[,2]
-  fitCI<-survfit( surv2 ~ 1 , weights = rep( 1 , length( times ) ) / m , conf.type = 'none' )  
-  pr <- fitCI$prev
-  t0 <- fitCI$time
-  #lines(t0,1-pr,type='s' , col = 2 )  
+  #surv<-Surv( time = times , event = rep( data$right != Inf , m )  , type = 'right')
+  #surv2<-Surv( time = times , event = rep( data$right != Inf , m )  , type = 'mstate')
+  #surv2[,2] <- surv[,2]
+  #fitCI<-survfit( surv2 ~ 1 , weights = rep( 1 , length( times ) ) / m , conf.type = 'none' )  
+  #pr <- fitCI$prev
+  #t0<- fitCI$time
+  #ne<- fitCI$n.event
+  #nt<- rep(t0,ne)
+  #nt  
   est_1 <- apply( samples2  ,  2  ,  get.est  ,  data  ,   formula )
       
   #get the betas in a matrix (x * k)
@@ -78,33 +76,36 @@ function(formula , data , k , m ){
   #get the mean of the betas over augmented datasets
   beta <- rowMeans( matrix( unlist( sapply( est_1  ,  function( x ) x$beta ) )  ,  nrow  =  dim_beta  ,  dimnames  =  list( dn  ,  1:m) ) )
       
-    #Get the sigma in an d3 array
-    sigma <- array( sapply( est_1 , function( x ) x$sigma )  ,  dim  =  c( dim_beta  ,  dim_beta  ,  m ) )
+  #Get the sigma in an d3 array
+  sigma <- array( sapply( est_1 , function( x ) x$sigma )  ,  dim  =  c( dim_beta  ,  dim_beta  ,  m ) )
     
-    #within variance: W
-    W <- apply( sigma , c( 1 , 2 ) , mean )
+  #within variance: W
+  W <- apply( sigma , c( 1 , 2 ) , mean )
     
-    #update the CIF
-    s0 <- data.frame( time = t0 , surv =  ( 1 -  pr )^( exp( sum( -beta * m1 ) ) ) )
-    s0 <- rbind( c( time = 0 , surv = 1 ) , s0 )
-    s0$surv[is.na(s0$surv)] <- 0
-    s0$diff <- c( 0 , diff( 1 - s0$surv ) )
-
-    #Betwin variance: B with inflation factor 1/k 
-    B <- ( 1 + ( 1 / m ) ) * ( ( betas - beta ) %*% t( betas - beta ) / ( m - 1 ) )
-    #update de variance matrix
-    sigmac <- W + B
-    
-    #update linear predictor
-    Z <- mm[ , -1 ]%*%as.matrix( beta )
-    beta_iter[ , i ] <- beta
-    sigmac_iter[ , i ] <- diag( sigmac )
-    }
+  #update the CIF
+  #compute exp (sum of B'Z )
+  keep <- as.vector(sapply(strsplit( as.character(formula)[2] , '\\+' ) , function(x) gsub(' ' , '', x) ))
+  adf<-as.data.frame(sapply(keep,function(x) as.data.frame((rep(data[,x],m)))))
+  colnames(adf)<-keep
+  r2<-as.numeric(rep( data$right != Inf , m ))
+  adf2<-data.frame(times,status=r2,adf)
+  s0<-BBS(formula = formula , time = 'times' , status = 'status' , data = adf2 , beta = beta) 
+  s0 <- rbind( c( time = 0 , surv = 1 ) , s0 , c(max(times),tail(s0$surv,1)))
+  s0$surv[is.na(s0$surv)] <- 0
+  s0$diff<-c(0,diff(1-s0$surv))
+  
+  #Betwin variance: B with inflation factor 1/k 
+  B <- ( 1 + ( 1 / m ) ) * ( ( betas - beta ) %*% t( betas - beta ) / ( m - 1 ) )
+  #update de variance matrix
+  sigmac <- W + B
+  
+  #update linear predictor
+  Z <- mm[ , -1 ]%*%as.matrix( beta )
+  beta_iter[ , i ] <- beta
+  sigmac_iter[ , i ] <- diag( sigmac )
+  }
 
   close( pb )
   ret<-list( beta = beta_iter , sigmac = sigmac_iter , vcov = sigmac , s0 = s0 )
   return( ret )
-}
-  
-  
-
+  }

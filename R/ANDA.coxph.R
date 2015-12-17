@@ -6,7 +6,7 @@ function(formula , data , k  , m )
   prep     <- preproc.coxph( data , m  )
   data_int <- prep$data2
   data_fix <- prep$data1
-  or       <-prep$or
+  or       <- prep$or
   I        <- prep$I 
     
   mm       <- model.matrix(formula , data)
@@ -26,8 +26,9 @@ function(formula , data , k  , m )
   #initial linear predictors
   Z   <- apply( beta_AN , 1 , function(x)  mm[ , -1 ]%*%as.matrix( x ) )
   
-  s0 <- MI.surv( m = m , data =  data , conf.int = F )$est
+  s0 <- MI.surv_1( m = m , data =  data , conf.int = F )$est
   s0$diff <- c( 0 , diff( 1 - s0$surv ) )
+  
   #Step 2  
   # make matrix to get results
   cat('\n\nIterates\n' )
@@ -44,31 +45,30 @@ function(formula , data , k  , m )
     if( i > k ){setTxtProgressBar(pb ,  0.02 )
     break }
   
+  
   ss1     <-apply( data_int , 1 , function( x ) subset( s0 , time >=  as.numeric(x['left']) & time <= as.numeric( x[ 'right' ] ) ) )
   tk2     <- sapply( seq_len( nrow( data_int ) ) , function( X )  ss1[[ X ]]$time )
-  
   #Get the samples from drown betas from the normal mixture
   samples <- sapply( seq_len( nrow( data_int ) ) , function( X ) {
   pk2 <- sapply( 1:m , function( x ) ss1[[ X ]]$diff^exp( Z[ I ,  ][ X , x ] ) ) 
   pk2 <- matrix(pk2,ncol=m) 
+  
   apply( pk2 , 2  , function( x ){
   if( sum(x) & length(x) > 1  ) sample(  tk2[[ X ]] , size = 1 , prob = ( x ) ) 
   else  data_int[ X , 'right' ]  }  ) } )
     
   samples <- matrix( unlist( samples ) , ncol = m , byrow = T )  
-  
     
   samples2 <- rbind( samples , data_fix )[ or , ]
-  head(samples2)
   times    <- as.vector( samples2 )
-  surv<-Surv( time = times , event = rep( data$right != Inf , m )  , type = 'right')
-  surv2<-Surv( time = times , event = rep( data$right != Inf , m )  , type = 'mstate')
-  surv2[,2] <- surv[,2]
-  fitCI<-survfit( surv2 ~ 1 , weights = rep( 1 , length( times ) ) / m , conf.type = 'none')  
-  pr    <- fitCI$prev
-  t0    <- fitCI$time
+  #surv<-Surv( time = times , event = rep( data$right != Inf , m )  , type = 'right')
+  #surv2<-Surv( time = times , event = rep( data$right != Inf , m )  , type = 'mstate')
+  #surv2[,2]<-surv[,2]
+  #fitCI<-survfit( surv2 ~ 1 , weights = rep( 1 , length( times ) ) / m , conf.type = 'none')  
+  #t0<- fitCI$time
+  #ne<- fitCI$n.event
+  #nt<- rep(t0,ne)  
   
-    
   #Get estimates
   est_1 <- apply( samples2  ,  2  ,  get.est  ,  data  , formula )
     
@@ -96,8 +96,15 @@ function(formula , data , k  , m )
   
   #get the new estimate of the survival
   #update the CIF
-  s0<-data.frame(time = t0, surv =  ( 1 - pr )^( exp( sum( - beta * m1 ) ) ) )
-  s0 <- rbind( c( time = 0 , surv = 1 ) , s0 )
+  #compute exp (sum of B'Z )
+  
+  keep <- as.vector(sapply(strsplit( as.character(formula)[2] , '\\+' ) , function(x) gsub(' ' , '', x) ))
+  adf<-as.data.frame(sapply(keep,function(x) as.data.frame((rep(data[,x],m)))))
+  colnames(adf)<-keep
+  r2<-as.numeric(rep( data$right != Inf , m ))
+  adf2<-data.frame(times,status=r2,adf)
+  s0<-BBS(formula = formula , time = 'times' , status = 'status' , data = adf2 , beta = beta) 
+  s0 <- rbind( c( time = 0 , surv = 1 ) , s0 , c(max(times),tail(s0$surv,1)))
   s0$surv[is.na(s0$surv)] <- 0
   s0$diff<-c(0,diff(1-s0$surv))
   

@@ -1,12 +1,11 @@
-#'  @title Cox regression for interval censored data using data augmentation and multiple imputation
+#'  @title Cox regression for interval censored data using multiple imputation
 #'  @author Marc Delord 
-#'  @description Uses data augmentation and multiple imputation approach to compute the regression coefficient and its associated
+#'  @description Uses the multiple imputation approach to compute the regression coefficient and its associated
 #'  variance-covariance matrix, and the baseline survival estimates of a Cox proportional hazards regression for interval censorded data
 #'  @inheritParams MIICD.crreg
-#'  @inheritParams DA.ci
+#'  @inheritParams MI.ci
 #'  @examples
-#'  res <- MIICD.coxph(formula = ~ treatment, k = 10, m = 10, data = bcos, verbose = FALSE)
-#'  res
+#'  res <- MIICD.coxph(formula = ~ treatment, k = 5, m = 5, data = bcos, verbose = FALSE)
 #'  plot(res)
 #'  #diagnostic plot for coefficients end associated standard error
 #'  plot(res , type = 'coef' , coef = 1)
@@ -15,11 +14,10 @@
 #'  @import survival MASS  
 #'  @return \code{est} A data frame with estimates
 #'  @details
-#'  This function uses data augmentation and multiple imputation approach to estimate regression coefficient, its variance-covvariance 
+#'  This function uses multiple imputation approach to estimate regression coefficient, its variance-covvariance 
 #'   matrix, and baseline survival estimates for a Cox proportional hazards regression for interval censorded data.
 #'  
-#'  Estimates are computed using Rubin's rules (Rubin (1987)). Estimate of coefficient is computed as the mean of estimates over imputation. The
-#'  variance-covariance matrix is computed as the within imputation variance and the between imputation variance augmented by an
+#'  Estimates are computed using Rubin's rules (Rubin (1987)). Estimate of coefficient is computed as the mean of estimates over imputation. #'  The variance-covariance matrix is computed as the within imputation variance and the between imputation variance augmented by an
 #'  inflation factor to take into account the finite number of imputation. At each iteration, the baseline survival function is updated
 #'  and multiple imputation is performed using updated estimates.
 #'  
@@ -29,6 +27,8 @@
 #'  \code{right} columns indicates lower and upper bounds of intervals respectively. \code{Inf} in the right column stands
 #'  for right censored observations.
 #'  
+#'  @references Delord, M. & Genin, E. Multiple Imputation for Competing Risks Regression with Interval Censored Data Journal of Statistical
+#'  Computation and Simulation, 2015
 #'  @references PAN, Wei. A Multiple Imputation Approach to Cox Regression with Interval-Censored Data. Biometrics, 2000, vol. 56, no 1,
 #'   p. 199-203.
 #'  @references Rubin, D. B. (1987). Multiple imputation for nonresponse in surveys. 
@@ -116,8 +116,8 @@ print.MIICD_coxph<-function( x , ... ){
 #' @param x a MIICD_coxph object
 #' @param type type of diagnoctic plot to display
 #' @param coef An integer: the no of the coefficient to display
-#' @inheritParams plot.DA_surv
-#' @export 
+#' @inheritParams plot.MI_surv
+#' @export
 plot.MIICD_coxph<-function ( x , type = c('baseline','coef','sigma') , coef = 1 ,  ylab = 'Survival' , xlab = 'Time' , ... ) 
     {
       type<-match.arg(type)
@@ -130,6 +130,4 @@ plot.MIICD_coxph<-function ( x , type = c('baseline','coef','sigma') , coef = 1 
     }else if(type == 'sigma'){
       plot(as.vector(x$Sigma_seq[coef,]) , type ='b' ,xlab='Iteration' , ylab = paste('sd(',rownames(x$Coef_seq)[coef],')',sep=' '))
     }
-} 
-
-
+}
