@@ -64,7 +64,7 @@ function(formula , data , k , m ){
   #surv2<-Surv( time = times , event = rep( data$right != Inf , m )  , type = 'mstate')
   #surv2[,2] <- surv[,2]
   #fitCI<-survfit( surv2 ~ 1 , weights = rep( 1 , length( times ) ) / m , conf.type = 'none' )  
-  #pr <- fitCI$prev
+  #pr <- fitCI$pstate
   #t0<- fitCI$time
   #ne<- fitCI$n.event
   #nt<- rep(t0,ne)

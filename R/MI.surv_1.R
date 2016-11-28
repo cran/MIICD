@@ -52,7 +52,7 @@ surv2<-Surv( time = times , event = rep( data$right != Inf , m ) , type = "mstat
 surv2[,2]<-surv[,2]
 fitsurv<-survfit( surv2 ~ 1 , weights = rep( 1 , length( times ) ) / m , conf.type = 'none')  
 sd <- fitsurv$std.err
-pr <- fitsurv$prev
+pr <- fitsurv$pstate
 t0 <- fitsurv$time
 #get estimated of cumulative incidence and confidence intervals
 if(conf.int){

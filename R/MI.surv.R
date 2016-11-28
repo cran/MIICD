@@ -74,7 +74,7 @@ surv2[ , 2 ] <- surv[ , 2 ]
 
 fitCI<-survfit( surv2 ~ 1 , weights = rep( 1 , length( times ) ) / m  , conf.type = 'none')  
 sd <- fitCI$std.err
-pr <-  1 - fitCI$prev
+pr <-  1 - fitCI$pstate
 t0 <- fitCI$time
 CI<-unique(rbind(c(time = 0 ,  surv = 1 ) , data.frame( time = t0 , surv = pr )))
 CI$diff <- c( 0 , diff( 1 - CI$surv ) )

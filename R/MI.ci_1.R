@@ -66,7 +66,7 @@ fitCI <- survfit( Surv( time = times , event = r2 , type = "mstate"  ) ~ 1  , we
 conf.type = 'none' )
 
 w <- which( fitCI$states == trans )
-pr <- fitCI$prev[ , w ]
+pr <- fitCI$pstate[ , w ]
 sd <- fitCI$std.err[ , w ]
 t0 <- fitCI$time
 #get estimated of cumulative incidence and confidence intervals

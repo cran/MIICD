@@ -72,7 +72,7 @@ function(formula , data , k = 25 , m = 10 , status , trans , cens.code ){
   fitCI<-survival::survfit( ci ~ 1 , weights = rep( 1 , length( times ) ) / m , conf.type = 'none')  
   
   w <- which( fitCI$states == trans )
-  pr <- fitCI$prev[ , w ]
+  pr <- fitCI$pstate[ , w ]
   t0 <- fitCI$time
   
     

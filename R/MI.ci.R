@@ -93,7 +93,7 @@ ci<-Surv( time = times , event = r2 , type = 'mstate')
 fitCI<-survfit( ci ~ 1 , weights = rep( 1 , length( times ) ) / m , conf.type = 'none')  
 w <- which( fitCI$states == trans )
 sd <- fitCI$std.err[ , w ]
-pr <- fitCI$prev[ , w ]
+pr <- fitCI$pstate[ , w ]
 t0 <- fitCI$time
 CI<-unique(rbind(c(time = 0 ,  est = 0 ) , data.frame( time = t0 , est = pr ) ))
 CI$diff <- c(0 , diff( CI$est ) )

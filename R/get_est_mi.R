@@ -4,7 +4,7 @@ get_est_mi<-function( x , status , trans , imp_sets , data = data , cens.code = 
   t1 <- imp_sets[ , x ]
   fitCI <- survfit( Surv( time = t1 , event = r2 , type = "mstate"  ) ~ 1 )
   w <- which( fitCI$states == trans )
-  pr <- fitCI$prev[ , w ]
+  pr <- fitCI$pstate[ , w ]
   sd <- fitCI$std.err[ , w ]
   t1 <- fitCI$time
   CI <- list(time = t1 , est = pr , sd = sd )

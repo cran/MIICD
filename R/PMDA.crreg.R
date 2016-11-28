@@ -71,7 +71,7 @@ function( formula , data , k  , m  , status , trans , cens.code ){
   times2[!r2%in%c(cens.code,trans)]<-Inf  
   fitCI<-survfit( ci ~ 1 , weights = rep( 1 , length( times ) ) / m  , conf.type = 'none')  
   w <- which( fitCI$states == trans )
-  #pr <- fitCI$prev[ , w ]
+  #pr <- fitCI$pstate[ , w ]
   t0 <- fitCI$time
   
   est_1<-apply(samples2 , 2 , get.est.cr.cox , data = data , status = status , trans = trans , cens.code = cens.code ,  formula = formula )

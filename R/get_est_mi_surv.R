@@ -9,7 +9,7 @@ get_est_mi_surv<-function( x , imp_sets , data = data  ){
   surv2[,2] <- surv[,2]
   fitCI <- survfit( surv2 ~ 1 , conf.type = 'none') 
   sd <- fitCI$std.err
-  pr <- fitCI$prev
+  pr <- fitCI$pstate
   t0 <- fitCI$time
   CI <- list(time = t0 , est = pr , sd = sd )
   return( CI )
