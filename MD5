@@ -1,4 +1,4 @@
-9c0e33de834d3adb66027b39fecae4ad *DESCRIPTION
+b9f64f253c1818544287c119f1454d86 *DESCRIPTION
 01afefb874fbb43a507f17c7f8b99de3 *NAMESPACE
 9680602ab6927526e137b5eca475a249 *R/ANDA.coxph.R
 29411f188e4f2728ef12785b9bed4622 *R/ANDA.crreg.R
@@ -16,7 +16,7 @@ fe61fdb789cd9af102878941c97123fd *R/PMDA.crreg.R
 ab296fa0802733719785a93f4bf00487 *R/bcos.R
 0b421816d43f064c6f5cb79e5c0a5319 *R/get.est.FG.R
 dc67985abaad38ab2fa25f1d9fad4a78 *R/get.est.R
-1f9e29ba8adc8ccb4ca19efa5ac97b26 *R/get.est.cr.cox.R
+36819ab7092c71ca8e775d707b666570 *R/get.est.cr.cox.R
 cdcda0e5c8eec027c3ec826cc3edbf2c *R/get.set.R
 aa9dde094a1d8924016b5148edbf984d *R/get_est_mi.R
 a9465be819a16167c4207c2ea7fe9e88 *R/get_est_mi_surv.R
